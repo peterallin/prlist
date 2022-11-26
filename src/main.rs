@@ -3,6 +3,8 @@ use clap::Parser;
 use early::Early;
 use serde::Deserialize;
 
+mod text;
+
 #[derive(Debug, Deserialize)]
 struct Reply<T> {
     value: Vec<T>,
@@ -57,11 +59,18 @@ fn main() -> Result<()> {
         if let Some(description) = pr.description {
             if description != pr.title {
                 println!("");
-                for para in description.split("\n\n").filter(|p| !p.is_empty()) {
-                    for line in textwrap::wrap(&para.replace("\n", " "), 70) {
-                        println!("   {line}")
+                for element in text::parse(&description) {
+                    match element {
+                        text::TextElement::Paragraph(p) => {
+                            for line in textwrap::wrap(&p, 70) {
+                                println!("   {line}");
+                            }
+                            println!();
+                        }
+                        text::TextElement::ListEntry(t) => {
+                            println!("   - {t}");
+                        }
                     }
-                    println!();
                 }
             }
         }
