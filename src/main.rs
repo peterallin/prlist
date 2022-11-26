@@ -20,7 +20,15 @@ struct PullRequest {
     description: Option<String>,
     is_draft: bool,
     pull_request_id: u32,
+    created_by: Author,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Author {
+    display_name: String,
+}
+
 
 #[derive(clap::Parser)]
 struct Options {
@@ -55,7 +63,7 @@ fn main() -> Result<()> {
         .json()?;
 
     for pr in pull_requests.value.into_iter().filter(|pr| !pr.is_draft) {
-        println!("--- {} ({})---", pr.title.trim_end(), pr.pull_request_id);
+        println!("{}: {} ({})", pr.created_by.display_name, pr.title.trim_end(), pr.pull_request_id);
         if let Some(description) = pr.description {
             if description != pr.title {
                 println!();
