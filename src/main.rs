@@ -58,7 +58,7 @@ fn main() -> Result<()> {
         println!("--- {} ({})---", pr.title.trim_end(), pr.pull_request_id);
         if let Some(description) = pr.description {
             if description != pr.title {
-                println!("");
+                println!();
                 for element in text::parse(&description) {
                     match element {
                         text::TextElement::Paragraph(p) => {
@@ -74,7 +74,7 @@ fn main() -> Result<()> {
                 }
             }
         }
-        println!("");
+        println!();
     }
     Ok(())
 }
