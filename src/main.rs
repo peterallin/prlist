@@ -17,6 +17,7 @@ struct PullRequest {
     title: String,
     description: Option<String>,
     is_draft: bool,
+    pull_request_id: u32,
 }
 
 #[derive(clap::Parser)]
@@ -52,13 +53,19 @@ fn main() -> Result<()> {
         .json()?;
 
     for pr in pull_requests.value.into_iter().filter(|pr| !pr.is_draft) {
-        println!("{}", pr.title);
+        println!("--- {} ({})---", pr.title.trim_end(), pr.pull_request_id);
         if let Some(description) = pr.description {
             if description != pr.title {
-                println!("\n{description}");
+                println!("");
+                for para in description.split("\n\n").filter(|p| !p.is_empty()) {
+                    for line in textwrap::wrap(&para.replace("\n", " "), 70) {
+                        println!("   {line}")
+                    }
+                    println!();
+                }
             }
-            println!("------------");
         }
+        println!("");
     }
     Ok(())
 }
