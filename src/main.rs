@@ -29,7 +29,6 @@ struct Author {
     display_name: String,
 }
 
-
 #[derive(clap::Parser)]
 struct Options {
     /// Path to the file containing the PAT for authenticating with Azure DevOps
@@ -60,10 +59,18 @@ fn main() -> Result<()> {
         .get(pull_requests)
         .basic_auth(&options.username, Some(pat))
         .send()?
-        .json()?;
+        .error_for_status()
+        .context("Failed to get PR list")?
+        .json()
+        .context("Failed to parse PR list")?;
 
     for pr in pull_requests.value.into_iter().filter(|pr| !pr.is_draft) {
-        println!("{}: {} ({})", pr.created_by.display_name, pr.title.trim_end(), pr.pull_request_id);
+        println!(
+            "{}: {} ({})",
+            pr.created_by.display_name,
+            pr.title.trim_end(),
+            pr.pull_request_id
+        );
         if let Some(description) = pr.description {
             if description != pr.title {
                 println!();
